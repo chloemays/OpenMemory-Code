@@ -238,19 +238,29 @@ export class AIAgentEnforcement {
     const errors: string[] = [];
 
     try {
-      // Check if project has any memories
-      const recentMemories = await hsg_query(
-        `${action.project_name} recent activities`,
-        1,
-        { user_id: action.agent_name }
-      );
-
-      // For non-initial actions, require memory presence
-      if (action.action_type !== 'update_state' && recentMemories.length === 0) {
-        errors.push(
-          `No OpenMemory records found for project "${action.project_name}". ` +
-          `AI agents must store project state before performing other actions.`
+      // For non-initial actions, check if project has ANY memories (state, actions, etc.)
+      if (action.action_type !== 'update_state') {
+        // Query for any memories tagged with this project name
+        // This is more reliable than semantic search for "recent activities"
+        const projectMemories = await all_async(
+          `SELECT COUNT(*) as count FROM memories
+           WHERE tags LIKE ? OR tags LIKE ? OR tags LIKE ?`,
+          [
+            `%"${action.project_name}"%`,           // Exact project name in tags
+            `%project-state%${action.project_name}%`, // Project state
+            `%agent-action%${action.project_name}%`   // Agent actions
+          ]
         );
+
+        const memoryCount = projectMemories[0]?.count || 0;
+
+        if (memoryCount === 0) {
+          errors.push(
+            `No OpenMemory records found for project "${action.project_name}". ` +
+            `AI agents must store project state before performing other actions. ` +
+            `Use POST /ai-agents/state to store initial project state.`
+          );
+        }
       }
     } catch (error: any) {
       console.warn('[Enforcement] OpenMemory validation failed:', error.message);
