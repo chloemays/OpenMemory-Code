@@ -78,9 +78,9 @@ export async function detectPotentialConflicts(
           severity: conflict.severity,
           involved_memory_ids: conflict.involved_memories.map(m => m.id),
           timestamp: new Date().toISOString(),
+          sector: 'reflective',
         },
-        user_id,
-        'reflective'
+        user_id
       );
       warningsCreated++;
     }

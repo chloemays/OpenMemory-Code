@@ -187,9 +187,9 @@ export async function assessDecisionQuality(
           status: 'IGNORED',
           age_days: ageDays,
           timestamp: new Date().toISOString(),
+          sector: 'reflective',
         },
-        user_id,
-        'reflective'
+        user_id
       );
       autoActionsTaken++;
 

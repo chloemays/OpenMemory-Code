@@ -138,9 +138,9 @@ export async function analyzeFailures(
           pattern_name: relatedPatternName,
           failed_action_id: action.id,
           timestamp: new Date().toISOString(),
+          sector: 'reflective',
         },
-        user_id,
-        'reflective'
+        user_id
       );
       autoActionsTaken++;
 
@@ -217,9 +217,9 @@ export async function analyzeFailures(
           related_pattern_id: relatedPatternId,
           related_decision_id: relatedDecisionId,
           timestamp: new Date().toISOString(),
+          sector: 'reflective',
         },
-        user_id,
-        'reflective'
+        user_id
       );
       lessonsCreated++;
       autoActionsTaken++;

@@ -146,9 +146,9 @@ function detectConflict(content1: string, content2: string): boolean {
 
   // Check for contradictory directives
   const directivePatterns = [
-    { pattern1: /prefer\s+(\w+)/gi, pattern2: /avoid\s+\1/gi },
-    { pattern1: /always\s+(\w+)/gi, pattern2: /never\s+\1/gi },
-    { pattern1: /must\s+use\s+(\w+)/gi, pattern2: /must\s+not\s+use\s+\1/gi },
+    { pattern1: /prefer\s+(\w+)/gi, pattern2: /avoid\s+(\w+)/gi },
+    { pattern1: /always\s+(\w+)/gi, pattern2: /never\s+(\w+)/gi },
+    { pattern1: /must\s+use\s+(\w+)/gi, pattern2: /must\s+not\s+use\s+(\w+)/gi },
   ];
 
   for (const { pattern1, pattern2 } of directivePatterns) {

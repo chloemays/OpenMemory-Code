@@ -12,7 +12,7 @@
  * - Provides automatic rollback on failures
  */
 
-import { q, run_async, all_async } from '../../core/db';
+import { q, run_async, all_async, get_async } from '../../core/db';
 import { hsg_query } from '../../memory/hsg';
 
 interface EnforcementConfig {
@@ -290,7 +290,7 @@ export class AIAgentEnforcement {
     try {
       // Check if dependencies are completed
       for (const depId of action.dependencies) {
-        const depStatus = await q(
+        const depStatus = await get_async(
           `SELECT meta FROM memories WHERE id = ? AND tags LIKE '%completed%'`,
           [depId]
         );

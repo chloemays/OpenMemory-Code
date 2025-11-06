@@ -107,9 +107,9 @@ export async function runQualityGate(
         quality_score: qualityScore,
         blocking_violations: blockingCount,
         timestamp: new Date().toISOString(),
+        sector: 'reflective',
       },
-      user_id,
-      'reflective'
+      user_id
     );
   }
 

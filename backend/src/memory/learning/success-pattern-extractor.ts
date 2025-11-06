@@ -91,15 +91,15 @@ export async function extractSuccessPatterns(
         {
           project_name,
           pattern_name: pattern.pattern_name,
-          pattern_type: pattern.type,
+          pattern_type: pattern.pattern_type,
           confidence: pattern.confidence,
           frequency: pattern.frequency,
           success_rate: pattern.success_rate,
           auto_extracted: true,
           timestamp: new Date().toISOString(),
+          sector: 'procedural',
         },
-        user_id,
-        'procedural'
+        user_id
       );
 
       // Link pattern to source actions
@@ -190,7 +190,7 @@ async function extractSequencePatterns(
         pattern_name: `Success Sequence: ${seq.steps[0]} + ${seq.steps[1]}`,
         pattern_type: 'SEQUENCE',
         description: `Successful 3-step sequence observed ${seq.instances.length} times`,
-        example: seq.steps.map((s, i) => `${i + 1}. ${s}`).join('\n'),
+        example: seq.steps.map((s: string, i: number) => `${i + 1}. ${s}`).join('\n'),
         confidence: Math.min(0.95, 0.5 + (seq.instances.length * 0.1)),
         frequency: seq.instances.length,
         success_rate: 1.0, // All instances were successful

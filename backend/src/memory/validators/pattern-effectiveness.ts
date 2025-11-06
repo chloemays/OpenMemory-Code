@@ -167,9 +167,9 @@ export async function trackPatternEffectiveness(
           total_uses: totalUses,
           status: 'FAILING',
           timestamp: new Date().toISOString(),
+          sector: 'reflective',
         },
-        user_id,
-        'reflective'
+        user_id
       );
       autoActionsTaken++;
     }

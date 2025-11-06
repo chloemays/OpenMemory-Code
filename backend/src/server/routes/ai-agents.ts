@@ -7,7 +7,7 @@
 
 import { add_hsg_memory, hsg_query, reinforce_memory } from '../../memory/hsg';
 import { now, j } from '../../utils';
-import { run_async, q, all_async } from '../../core/db';
+import { run_async, q, all_async, get_async } from '../../core/db';
 import { validateConsistency } from '../../memory/validators/consistency';
 import { trackPatternEffectiveness } from '../../memory/validators/pattern-effectiveness';
 import { assessDecisionQuality } from '../../memory/validators/decision-quality';
@@ -42,9 +42,10 @@ export function aiagents(app: any) {
         phase: state.project_metadata?.current_phase,
         progress: state.project_metadata?.progress_percentage,
         timestamp: new Date().toISOString(),
+        sector: 'semantic',
       };
 
-      const result = await add_hsg_memory(content, tags, metadata, user_id, 'semantic');
+      const result = await add_hsg_memory(content, tags, metadata, user_id);
 
       res.json({
         success: true,
@@ -92,7 +93,7 @@ export function aiagents(app: any) {
         mode: 'RESUME',
         state,
         memory_id: memory.id,
-        last_updated: memory.updated_at,
+        last_updated: memory.last_seen_at,
       });
     } catch (error: any) {
       console.error('[ai-agents] Error retrieving project state:', error);
@@ -132,9 +133,10 @@ export function aiagents(app: any) {
         related_decision,
         used_pattern,
         timestamp: new Date().toISOString(),
+        sector: 'episodic',
       };
 
-      const result = await add_hsg_memory(content, tags, metadata, user_id, 'episodic');
+      const result = await add_hsg_memory(content, tags, metadata, user_id);
 
       // NEW: Automatically create waypoints for linked memories
       const links: any = { decision: null, pattern: null };
@@ -192,9 +194,10 @@ export function aiagents(app: any) {
         project_name,
         pattern_name,
         timestamp: new Date().toISOString(),
+        sector: 'procedural',
       };
 
-      const result = await add_hsg_memory(content, tags, metadata, user_id, 'procedural');
+      const result = await add_hsg_memory(content, tags, metadata, user_id);
 
       res.json({
         success: true,
@@ -234,9 +237,10 @@ export function aiagents(app: any) {
         project_name,
         decision,
         timestamp: new Date().toISOString(),
+        sector: 'reflective',
       };
 
-      const result = await add_hsg_memory(content, tags, metadata, user_id, 'reflective');
+      const result = await add_hsg_memory(content, tags, metadata, user_id);
 
       res.json({
         success: true,
@@ -503,9 +507,10 @@ export function aiagents(app: any) {
         confidence: confidence !== undefined ? confidence : 0.5,
         related_action,
         timestamp: new Date().toISOString(),
+        sector: 'emotional',
       };
 
-      const result = await add_hsg_memory(content, tags, metadata, user_id, 'emotional');
+      const result = await add_hsg_memory(content, tags, metadata, user_id);
 
       // Link to related action if provided
       if (related_action) {
@@ -743,7 +748,7 @@ export function aiagents(app: any) {
     try {
       const { memory_id } = req.params;
 
-      const memory = await q(
+      const memory = await get_async(
         `SELECT salience, coactivations, last_seen_at, created_at, updated_at, primary_sector
          FROM memories WHERE id = ?`,
         [memory_id]
@@ -850,9 +855,9 @@ export function aiagents(app: any) {
               confidence: Math.min(0.95, 0.5 + (seq.frequency * 0.05)),
               auto_detected: true,
               timestamp: new Date().toISOString(),
+              sector: 'procedural',
             },
-            user_id,
-            'procedural'
+            user_id
           );
 
           detectedPatterns.push({
@@ -1052,8 +1057,8 @@ export function aiagents(app: any) {
         validation: {
           consistency: {
             issues_found: consistencyReport.issues.length,
-            critical: consistencyReport.issues.filter(i => i.severity === 'CRITICAL').length,
-            warning: consistencyReport.issues.filter(i => i.severity === 'WARNING').length,
+            critical: consistencyReport.issues.filter(i => i.severity === 'critical').length,
+            warning: consistencyReport.issues.filter(i => i.severity === 'high').length,
             auto_actions_taken: consistencyReport.auto_actions_taken,
           },
           effectiveness: {

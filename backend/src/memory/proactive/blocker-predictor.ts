@@ -85,9 +85,9 @@ export async function predictBlockers(
           severity: blocker.severity,
           probability: blocker.probability,
           timestamp: new Date().toISOString(),
+          sector: 'reflective',
         },
-        user_id,
-        'reflective'
+        user_id
       );
       warningsCreated++;
     }

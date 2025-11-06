@@ -88,9 +88,9 @@ export async function detectAnomalies(
           metric_value: anomaly.metric_value,
           deviation: anomaly.deviation_percentage,
           timestamp: new Date().toISOString(),
+          sector: 'reflective',
         },
-        user_id,
-        'reflective'
+        user_id
       );
       alertsCreated++;
     }

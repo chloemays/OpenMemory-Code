@@ -8,7 +8,8 @@
     "openmemory-mcp": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc && chmod +x dist/index.js",
+    "build": "tsc",
+    "postbuild": "node -e \"try{require('fs').chmodSync('dist/index.js',0o755)}catch(e){}\"",
     "dev": "tsx src/index.ts",
     "watch": "tsx watch src/index.ts"
   },
