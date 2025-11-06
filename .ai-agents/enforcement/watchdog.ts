@@ -14,7 +14,7 @@
  * - Ensures continuous compliance
  */
 
-import fetch from 'node-fetch';
+// Node.js v18+ has built-in fetch, no need for node-fetch
 import * as fs from 'fs';
 import * as path from 'path';
 

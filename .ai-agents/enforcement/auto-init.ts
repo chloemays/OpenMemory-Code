@@ -15,7 +15,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import fetch from 'node-fetch';
+// Node.js v18+ has built-in fetch, no need for node-fetch
 
 interface InitResult {
   success: boolean;

@@ -70,21 +70,33 @@ if ($exitCode -eq 0) {
     Write-Host "Installation completed successfully!" -ForegroundColor Green
     Write-Host "=====================================================================" -ForegroundColor Green
     Write-Host ""
-    Write-Host "The scripts have been added to your PATH." -ForegroundColor Cyan
+    Write-Host "Management scripts installed at: $env:USERPROFILE\.openmemory-global\bin" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "IMPORTANT: You need to reload your shell for PATH changes to take effect." -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "Available commands (after reloading shell):" -ForegroundColor Cyan
+    Write-Host "Available commands:" -ForegroundColor Cyan
     Write-Host "  openmemory-start         Start OpenMemory backend" -ForegroundColor White
     Write-Host "  openmemory-init          Initialize new project" -ForegroundColor White
     Write-Host "  openmemory-status        Show system status" -ForegroundColor White
     Write-Host "  openmemory-list          List all projects" -ForegroundColor White
+    Write-Host "  openmemory-watch         Project auto-detection watcher" -ForegroundColor White
+    Write-Host ""
+    Write-Host "HOW TO USE IN POWERSHELL:" -ForegroundColor Yellow
+    Write-Host "  These are bash scripts. Use this syntax from PowerShell:" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  # Start backend:" -ForegroundColor Gray
+    Write-Host "  & ""$bashPath"" -l $env:USERPROFILE\.openmemory-global\bin\openmemory-start" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  # Initialize project in current directory:" -ForegroundColor Gray
+    Write-Host "  & ""$bashPath"" -l $env:USERPROFILE\.openmemory-global\bin\openmemory-init" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  # Or use Git Bash directly for simpler commands:" -ForegroundColor Gray
+    Write-Host "  # In Git Bash: openmemory-start" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Quick start:" -ForegroundColor Cyan
-    Write-Host "  1. Reload your shell: Close and reopen PowerShell or Git Bash" -ForegroundColor White
-    Write-Host "  2. Start backend: openmemory-start" -ForegroundColor White
-    Write-Host "  3. In new project: openmemory-init" -ForegroundColor White
-    Write-Host "  4. Start coding - enforcement is active!" -ForegroundColor White
+    Write-Host "  1. Start backend (keep terminal open):" -ForegroundColor White
+    Write-Host "     & ""$bashPath"" -l $env:USERPROFILE\.openmemory-global\bin\openmemory-start" -ForegroundColor Gray
+    Write-Host "  2. In new project folder:" -ForegroundColor White
+    Write-Host "     & ""$bashPath"" -l $env:USERPROFILE\.openmemory-global\bin\openmemory-init" -ForegroundColor Gray
+    Write-Host "  3. Start coding - enforcement is active!" -ForegroundColor White
     Write-Host ""
 } else {
     Write-Host "Installation failed with exit code: $exitCode" -ForegroundColor Red

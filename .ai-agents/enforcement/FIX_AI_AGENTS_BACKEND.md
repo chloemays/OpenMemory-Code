@@ -311,10 +311,13 @@ Copy-Item -Recurse -Force C:\Users\dbiss\Desktop\Projects\Forks\OpenMemory C:\Us
 cd C:\Users\dbiss\.openmemory-global\backend\backend
 npm install
 
-# Start backend
-openmemory-start
+# Start backend (PowerShell syntax)
+& "C:\Program Files\Git\bin\bash.exe" -l C:\Users\dbiss\.openmemory-global\bin\openmemory-start
 
-# Test
+# Or in a separate PowerShell window, keep it running in background:
+# Start-Process "C:\Program Files\Git\bin\bash.exe" -ArgumentList "-l", "C:\Users\dbiss\.openmemory-global\bin\openmemory-start"
+
+# Test (in a new terminal while backend is running)
 curl.exe http://localhost:8080/ai-agents/history/tester
 ```
 
