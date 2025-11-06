@@ -214,8 +214,47 @@ OPENMEMORY_URL=http://localhost:8080
     }
   }
 
-  // Install git hooks if this is a git repository
+  // Check if git is initialized, offer to initialize if not
   const gitDir = path.join(projectDir, '.git');
+  let hooksInstalled = false;
+
+  if (!fs.existsSync(gitDir)) {
+    log('⚠️  Git repository not initialized', colors.yellow);
+    log('', colors.reset);
+    log('   Git is required for enforcement hooks to work.', colors.yellow);
+    log('', colors.reset);
+
+    // Try to initialize git automatically
+    try {
+      log('   Attempting to initialize git repository...', colors.blue);
+      execSync('git init', { cwd: projectDir, encoding: 'utf-8' });
+      log('   ✅ Git repository initialized', colors.green);
+      log('', colors.reset);
+    } catch (error) {
+      log('   ⚠️  Could not auto-initialize git (git may not be installed)', colors.yellow);
+      log('', colors.reset);
+      log('   MANUAL SETUP REQUIRED:', colors.yellow);
+      log('     1. Install git if not already installed', colors.cyan);
+      log('     2. Run: git init', colors.green);
+      log('     3. Run: bash .ai-agents/enforcement/post-git-init-installer.sh', colors.green);
+      log('', colors.reset);
+
+      // Create pending marker
+      const pendingMarker = path.join(aiAgentsDir, '.hooks-pending');
+      fs.writeFileSync(pendingMarker, JSON.stringify({
+        reason: 'Git repository not initialized and auto-init failed',
+        timestamp: new Date().toISOString(),
+        instructions: [
+          'Install git if not already installed',
+          'Run: git init',
+          'Then run: bash .ai-agents/enforcement/post-git-init-installer.sh',
+          'Or re-run: node ' + path.join(__dirname, 'openmemory-init.js') + ' ' + projectDir
+        ]
+      }, null, 2));
+    }
+  }
+
+  // Install git hooks if this is a git repository
   if (fs.existsSync(gitDir)) {
     try {
       log('Installing git hooks for enforcement...', colors.blue);
@@ -224,7 +263,11 @@ OPENMEMORY_URL=http://localhost:8080
 
       if (fs.existsSync(installScript)) {
         // Make script executable
-        fs.chmodSync(installScript, 0o755);
+        try {
+          fs.chmodSync(installScript, 0o755);
+        } catch (e) {
+          // Ignore chmod errors on Windows
+        }
 
         // Run install script
         const result = execSync(`bash "${installScript}" "${projectDir}"`, {
@@ -232,17 +275,32 @@ OPENMEMORY_URL=http://localhost:8080
           encoding: 'utf-8'
         });
 
-        log('✅ Git hooks installed successfully', colors.green);
+        // Verify hooks were actually installed
+        const preCommitHook = path.join(gitDir, 'hooks', 'pre-commit');
+        if (fs.existsSync(preCommitHook)) {
+          hooksInstalled = true;
+          log('✅ Git hooks installed successfully', colors.green);
+        } else {
+          log('⚠️  Git hook installation completed but hooks not found', colors.yellow);
+        }
       } else {
         log('⚠️  Git hook installation script not found', colors.yellow);
       }
     } catch (error) {
-      log('⚠️  Failed to install git hooks (you can install manually later)', colors.yellow);
+      log('⚠️  Failed to install git hooks', colors.yellow);
       log(`   Error: ${error.message}`, colors.red);
     }
-  } else {
-    log('⚠️  Not a git repository - git hooks not installed', colors.yellow);
-    log('   Initialize git first: git init', colors.cyan);
+  }
+
+  // Update enforcement-status.json to reflect actual installation status
+  const enforcementStatusPath = path.join(aiAgentsDir, 'enforcement-status.json');
+  if (fs.existsSync(enforcementStatusPath)) {
+    const status = JSON.parse(fs.readFileSync(enforcementStatusPath, 'utf-8'));
+    status.git_hooks_installed = hooksInstalled;
+    status.enforcement_active = hooksInstalled;
+    status.timestamp = new Date().toISOString();
+    status.project = projectName;
+    fs.writeFileSync(enforcementStatusPath, JSON.stringify(status, null, 2));
   }
 
   // Success message
@@ -260,13 +318,20 @@ OPENMEMORY_URL=http://localhost:8080
   log('  1. Ensure OpenMemory backend is running:', colors.cyan);
   log('     npm start', colors.green);
   log('  2. Start coding in your project!', colors.cyan);
-  log('  3. Your AI assistant will automatically use OpenMemory context', colors.cyan);
   console.log('');
-  log('🔒 Enforcement Enabled:', colors.blue);
-  log('  • Git hooks will validate all commits', colors.cyan);
-  log('  • AI agents must record actions in OpenMemory', colors.cyan);
-  log('  • Project state tracked automatically', colors.cyan);
-  log('  • Cannot bypass without logging', colors.cyan);
+
+  if (hooksInstalled) {
+    log('🔒 Enforcement Status: ACTIVE', colors.green);
+    log('  • Git hooks will validate all commits', colors.cyan);
+    log('  • AI agents must record actions in OpenMemory', colors.cyan);
+    log('  • Project state tracked automatically', colors.cyan);
+    log('  • Cannot bypass without logging', colors.cyan);
+  } else {
+    log('⚠️  Enforcement Status: PENDING', colors.yellow);
+    log('  • Git hooks NOT YET installed', colors.yellow);
+    log('  • Initialize git and install hooks to enable enforcement', colors.yellow);
+    log('  • See instructions above for how to complete installation', colors.yellow);
+  }
   console.log('');
 
   return true;
