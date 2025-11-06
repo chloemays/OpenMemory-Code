@@ -4,7 +4,10 @@
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(gh repo create:*)",
+      "Bash(where:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

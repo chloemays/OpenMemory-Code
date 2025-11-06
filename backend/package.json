@@ -1,7 +1,14 @@
 {
-    "name": "openmemory-backend",
-    "version": "1.0.0",
-    "author": "nullure",
+    "name": "openmemory-code-backend",
+    "version": "3.0.0",
+    "author": {
+        "name": "Daniel A Bissey",
+        "email": "support@fatstinkypanda.com"
+    },
+    "contributors": [
+        "nullure (Original OpenMemory)",
+        "OpenMemory Contributors"
+    ],
     "scripts": {
         "dev": "tsx src/server/index.ts",
         "build": "tsc -p tsconfig.json",

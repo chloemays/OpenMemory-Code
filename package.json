@@ -1,7 +1,7 @@
 {
-  "name": "openmemory",
-  "version": "2.1.0",
-  "description": "Long-term memory for AI systems with enforced autonomous AI agent development",
+  "name": "openmemory-code",
+  "version": "3.0.0",
+  "description": "AI Agent Development Platform with Enforced Long-Term Memory - Built on OpenMemory with automatic service management, MCP server support, and comprehensive AI agent enforcement for coding projects",
   "scripts": {
     "start": "node start-openmemory.js",
     "dev": "node start-openmemory.js --dev",
@@ -13,17 +13,38 @@
   },
   "keywords": [
     "ai",
+    "agents",
     "memory",
     "llm",
-    "agents",
-    "openmemory",
+    "coding",
+    "development",
     "mcp",
-    "context"
+    "claude",
+    "context",
+    "enforcement",
+    "openmemory",
+    "long-term-memory",
+    "ai-development",
+    "code-generation"
   ],
-  "author": "OpenMemory Contributors",
+  "author": {
+    "name": "Daniel A Bissey",
+    "email": "support@fatstinkypanda.com",
+    "url": "https://github.com/fatstinkypanda"
+  },
+  "contributors": [
+    {
+      "name": "OpenMemory Contributors",
+      "url": "https://github.com/caviraoss/openmemory"
+    }
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/caviraoss/openmemory.git"
+    "url": "https://github.com/fatstinkypanda/OpenMemory-Code.git"
+  },
+  "homepage": "https://github.com/fatstinkypanda/OpenMemory-Code#readme",
+  "bugs": {
+    "url": "https://github.com/fatstinkypanda/OpenMemory-Code/issues"
   }
 }
