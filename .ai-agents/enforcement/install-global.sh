@@ -160,11 +160,25 @@ fi
 # Copy AI agents template
 echo ""
 echo "Installing AI agents template..."
-if [ -d "${BACKEND_DIR}/.ai-agents" ]; then
-    cp -r "${BACKEND_DIR}/.ai-agents/"* "${TEMPLATE_DIR}/"
-    echo -e "${GREEN}✓ Template installed${NC}"
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_AI_AGENTS="$(dirname "$(dirname "$SCRIPT_DIR")")"  # Go up to .ai-agents parent
+
+# Try to find .ai-agents directory
+AI_AGENTS_SOURCE=""
+if [ -d "${SOURCE_AI_AGENTS}/.ai-agents" ]; then
+    AI_AGENTS_SOURCE="${SOURCE_AI_AGENTS}/.ai-agents"
+elif [ -d "${BACKEND_DIR}/.ai-agents" ]; then
+    AI_AGENTS_SOURCE="${BACKEND_DIR}/.ai-agents"
+fi
+
+if [ -n "$AI_AGENTS_SOURCE" ]; then
+    cp -r "${AI_AGENTS_SOURCE}/"* "${TEMPLATE_DIR}/"
+    echo -e "${GREEN}✓ Template installed from: ${AI_AGENTS_SOURCE}${NC}"
 else
-    echo -e "${YELLOW}⚠ .ai-agents directory not found in repository${NC}"
+    echo -e "${YELLOW}⚠ .ai-agents directory not found, creating minimal template${NC}"
+    mkdir -p "${TEMPLATE_DIR}/enforcement/git-hooks"
 fi
 
 # Create project registry
@@ -473,8 +487,9 @@ cat > "${WATCHER_DIR}/config.json" <<'EOF'
 }
 EOF
 
-# Expand ~ in watch paths
-python3 <<PYTHON
+# Expand ~ in watch paths (skip on Windows/MinGw due to path format issues)
+if [ "$OS_TYPE" != "MinGw" ]; then
+    python3 <<PYTHON
 import json
 import os
 from pathlib import Path
@@ -491,6 +506,10 @@ for p in config["watchPaths"]:
 config["watchPaths"] = expanded_paths
 config_file.write_text(json.dumps(config, indent=2))
 PYTHON
+else
+    # On Windows, leave paths as-is (will be expanded at runtime)
+    echo -e "${YELLOW}  Note: Watch paths will use default locations on Windows${NC}"
+fi
 
 echo -e "${GREEN}✓ Watcher configuration created${NC}"
 
