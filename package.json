@@ -30,7 +30,7 @@
   "author": {
     "name": "Daniel A Bissey",
     "email": "support@fatstinkypanda.com",
-    "url": "https://github.com/fatstinkypanda"
+    "url": "https://github.com/FatStinkyPanda"
   },
   "contributors": [
     {
@@ -41,10 +41,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fatstinkypanda/OpenMemory-Code.git"
+    "url": "https://github.com/FatStinkyPanda/OpenMemory-Code.git"
   },
-  "homepage": "https://github.com/fatstinkypanda/OpenMemory-Code#readme",
+  "homepage": "https://github.com/FatStinkyPanda/OpenMemory-Code#readme",
   "bugs": {
-    "url": "https://github.com/fatstinkypanda/OpenMemory-Code/issues"
+    "url": "https://github.com/FatStinkyPanda/OpenMemory-Code/issues"
   }
 }
