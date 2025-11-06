@@ -12,6 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const { homedir } = require('os');
+const { execSync } = require('child_process');
 
 // Colors for console output
 const colors = {
@@ -70,6 +71,34 @@ function saveRegistry(globalDir, registry) {
   const registryPath = path.join(globalDir, 'projects', 'registry.json');
   registry.updated = new Date().toISOString();
   fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2));
+}
+
+function copyDirectoryRecursive(source, target) {
+  if (!fs.existsSync(target)) {
+    fs.mkdirSync(target, { recursive: true });
+  }
+
+  const files = fs.readdirSync(source);
+
+  for (const file of files) {
+    const sourcePath = path.join(source, file);
+    const targetPath = path.join(target, file);
+    const stat = fs.statSync(sourcePath);
+
+    if (stat.isDirectory()) {
+      copyDirectoryRecursive(sourcePath, targetPath);
+    } else {
+      fs.copyFileSync(sourcePath, targetPath);
+      // Preserve executable permissions for shell scripts
+      if (file.endsWith('.sh')) {
+        try {
+          fs.chmodSync(targetPath, 0o755);
+        } catch (e) {
+          // Ignore chmod errors on Windows
+        }
+      }
+    }
+  }
 }
 
 function initializeProject(projectDir) {
@@ -135,6 +164,87 @@ OPENMEMORY_URL=http://localhost:8080
     }
   }
 
+  // Create .ai-agents directory structure
+  const aiAgentsDir = path.join(projectDir, '.ai-agents');
+  const enforcementDir = path.join(aiAgentsDir, 'enforcement');
+  const gitHooksDir = path.join(enforcementDir, 'git-hooks');
+
+  if (!fs.existsSync(aiAgentsDir)) {
+    fs.mkdirSync(aiAgentsDir, { recursive: true });
+    log('✅ Created .ai-agents directory', colors.green);
+  }
+
+  // Get OpenMemory-Code root (where this script is located)
+  const openMemoryRoot = __dirname;
+  const sourceAIAgentsDir = path.join(openMemoryRoot, '.ai-agents');
+
+  // Copy essential files
+  const filesToCopy = [
+    'config.json',
+    'enforcement-status.json',
+    'TEMPLATE_agent-roles.json',
+    'TEMPLATE_project-state.json',
+    'TEMPLATE_workflow-tracker.json',
+    'TEMPLATE_context-manager.json'
+  ];
+
+  for (const file of filesToCopy) {
+    const sourcePath = path.join(sourceAIAgentsDir, file);
+    const targetPath = path.join(aiAgentsDir, file.replace('TEMPLATE_', ''));
+
+    if (fs.existsSync(sourcePath) && !fs.existsSync(targetPath)) {
+      const content = fs.readFileSync(sourcePath, 'utf-8');
+
+      // Replace template values
+      const updatedContent = content
+        .replace(/TEMPLATE_Your_Project_Name/g, projectName)
+        .replace(/testagain/g, projectName)
+        .replace(/YYYY-MM-DDTHH:MM:SSZ/g, new Date().toISOString());
+
+      fs.writeFileSync(targetPath, updatedContent);
+      log(`✅ Created ${file.replace('TEMPLATE_', '')}`, colors.green);
+    }
+  }
+
+  // Copy enforcement directory
+  if (fs.existsSync(path.join(sourceAIAgentsDir, 'enforcement'))) {
+    if (!fs.existsSync(enforcementDir)) {
+      copyDirectoryRecursive(path.join(sourceAIAgentsDir, 'enforcement'), enforcementDir);
+      log('✅ Copied enforcement system', colors.green);
+    }
+  }
+
+  // Install git hooks if this is a git repository
+  const gitDir = path.join(projectDir, '.git');
+  if (fs.existsSync(gitDir)) {
+    try {
+      log('Installing git hooks for enforcement...', colors.blue);
+
+      const installScript = path.join(gitHooksDir, 'install-hooks.sh');
+
+      if (fs.existsSync(installScript)) {
+        // Make script executable
+        fs.chmodSync(installScript, 0o755);
+
+        // Run install script
+        const result = execSync(`bash "${installScript}" "${projectDir}"`, {
+          cwd: projectDir,
+          encoding: 'utf-8'
+        });
+
+        log('✅ Git hooks installed successfully', colors.green);
+      } else {
+        log('⚠️  Git hook installation script not found', colors.yellow);
+      }
+    } catch (error) {
+      log('⚠️  Failed to install git hooks (you can install manually later)', colors.yellow);
+      log(`   Error: ${error.message}`, colors.red);
+    }
+  } else {
+    log('⚠️  Not a git repository - git hooks not installed', colors.yellow);
+    log('   Initialize git first: git init', colors.cyan);
+  }
+
   // Success message
   console.log('');
   log('═'.repeat(70), colors.green);
@@ -151,6 +261,12 @@ OPENMEMORY_URL=http://localhost:8080
   log('     npm start', colors.green);
   log('  2. Start coding in your project!', colors.cyan);
   log('  3. Your AI assistant will automatically use OpenMemory context', colors.cyan);
+  console.log('');
+  log('🔒 Enforcement Enabled:', colors.blue);
+  log('  • Git hooks will validate all commits', colors.cyan);
+  log('  • AI agents must record actions in OpenMemory', colors.cyan);
+  log('  • Project state tracked automatically', colors.cyan);
+  log('  • Cannot bypass without logging', colors.cyan);
   console.log('');
 
   return true;
