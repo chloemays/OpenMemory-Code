@@ -58,16 +58,21 @@ if [ ! -f "$GIT_HOOKS_SOURCE/pre-commit" ]; then
 fi
 echo -e "${GREEN}✓${NC} Enforcement hooks found"
 
-# Run the installation script
-INSTALL_SCRIPT="$GIT_HOOKS_SOURCE/install-hooks.sh"
+# Run the installation script (prefer Node.js version for cross-platform)
+INSTALL_SCRIPT_JS="$GIT_HOOKS_SOURCE/install-hooks.js"
+INSTALL_SCRIPT_SH="$GIT_HOOKS_SOURCE/install-hooks.sh"
 
-if [ -f "$INSTALL_SCRIPT" ]; then
-    chmod +x "$INSTALL_SCRIPT"
+if [ -f "$INSTALL_SCRIPT_JS" ]; then
     echo ""
-    echo "Running hook installer..."
-    "$INSTALL_SCRIPT" "$PROJECT_ROOT"
+    echo "Running hook installer (Node.js)..."
+    node "$INSTALL_SCRIPT_JS" "$PROJECT_ROOT"
+elif [ -f "$INSTALL_SCRIPT_SH" ]; then
+    chmod +x "$INSTALL_SCRIPT_SH"
+    echo ""
+    echo "Running hook installer (bash)..."
+    "$INSTALL_SCRIPT_SH" "$PROJECT_ROOT"
 else
-    echo -e "${RED}❌ ERROR: install-hooks.sh not found${NC}"
+    echo -e "${RED}❌ ERROR: install-hooks script not found${NC}"
     exit 1
 fi
 

@@ -259,32 +259,60 @@ OPENMEMORY_URL=http://localhost:8080
     try {
       log('Installing git hooks for enforcement...', colors.blue);
 
-      const installScript = path.join(gitHooksDir, 'install-hooks.sh');
+      // Use Node.js version of install script (cross-platform)
+      const installScriptJS = path.join(gitHooksDir, 'install-hooks.js');
+      const installScriptSH = path.join(gitHooksDir, 'install-hooks.sh');
 
-      if (fs.existsSync(installScript)) {
-        // Make script executable
+      let installSuccess = false;
+
+      // Try Node.js version first (always works cross-platform)
+      if (fs.existsSync(installScriptJS)) {
         try {
-          fs.chmodSync(installScript, 0o755);
+          const result = execSync(`node "${installScriptJS}" "${projectDir}"`, {
+            cwd: projectDir,
+            encoding: 'utf-8',
+            stdio: 'pipe'
+          });
+          installSuccess = true;
+        } catch (e) {
+          log('⚠️  Node.js installer failed, trying bash version...', colors.yellow);
+        }
+      }
+
+      // Fall back to bash version if Node.js version not available or failed
+      if (!installSuccess && fs.existsSync(installScriptSH)) {
+        try {
+          fs.chmodSync(installScriptSH, 0o755);
         } catch (e) {
           // Ignore chmod errors on Windows
         }
 
-        // Run install script
-        const result = execSync(`bash "${installScript}" "${projectDir}"`, {
-          cwd: projectDir,
-          encoding: 'utf-8'
-        });
-
-        // Verify hooks were actually installed
-        const preCommitHook = path.join(gitDir, 'hooks', 'pre-commit');
-        if (fs.existsSync(preCommitHook)) {
-          hooksInstalled = true;
-          log('✅ Git hooks installed successfully', colors.green);
-        } else {
-          log('⚠️  Git hook installation completed but hooks not found', colors.yellow);
+        try {
+          const result = execSync(`bash "${installScriptSH}" "${projectDir}"`, {
+            cwd: projectDir,
+            encoding: 'utf-8',
+            stdio: 'pipe'
+          });
+          installSuccess = true;
+        } catch (e) {
+          // Bash not available
+          log('⚠️  Bash not available (install Git for Windows or use WSL)', colors.yellow);
         }
+      }
+
+      // Verify hooks were actually installed
+      const preCommitHook = path.join(gitDir, 'hooks', 'pre-commit');
+      if (fs.existsSync(preCommitHook)) {
+        hooksInstalled = true;
+        log('✅ Git hooks installed successfully', colors.green);
       } else {
-        log('⚠️  Git hook installation script not found', colors.yellow);
+        log('⚠️  Git hook installation completed but hooks not found', colors.yellow);
+
+        // Provide recovery instructions
+        log('', colors.reset);
+        log('   To install hooks manually:', colors.yellow);
+        log('   node .ai-agents/enforcement/git-hooks/install-hooks.js', colors.green);
+        log('', colors.reset);
       }
     } catch (error) {
       log('⚠️  Failed to install git hooks', colors.yellow);
