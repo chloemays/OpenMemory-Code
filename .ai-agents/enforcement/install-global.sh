@@ -103,14 +103,23 @@ fi
 
 # Clone or update OpenMemory repository
 echo ""
-echo "Installing OpenMemory backend..."
+echo "Installing OpenMemory backend with AI Agents support..."
 if [ -d "${BACKEND_DIR}/.git" ]; then
     echo "Updating existing installation..."
     cd "${BACKEND_DIR}"
-    git pull origin main
+    # Check if it's the fork with AI agents support
+    REMOTE_URL=$(git config --get remote.origin.url)
+    if [[ "$REMOTE_URL" == *"FatStinkyPanda"* ]] || [[ "$REMOTE_URL" == *"ai-agents"* ]]; then
+        git pull origin main
+    else
+        echo -e "${YELLOW}⚠ Detected vanilla OpenMemory. Switching to AI Agents fork...${NC}"
+        cd ..
+        rm -rf "${BACKEND_DIR}"
+        git clone https://github.com/FatStinkyPanda/OpenMemory.git "${BACKEND_DIR}"
+    fi
 else
-    echo "Cloning OpenMemory repository..."
-    git clone https://github.com/caviraoss/openmemory.git "${BACKEND_DIR}"
+    echo "Cloning OpenMemory repository with AI Agents support..."
+    git clone https://github.com/FatStinkyPanda/OpenMemory.git "${BACKEND_DIR}"
 fi
 
 # Install backend dependencies
