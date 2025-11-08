@@ -781,12 +781,13 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         decision: { type: 'string', description: 'The decision made' },
         rationale: { type: 'string', description: 'Why this decision was made' },
         alternatives: { type: 'string', description: 'Alternatives considered (optional)' },
         consequences: { type: 'string', description: 'Expected consequences (optional)' },
       },
-      required: ['project_name', 'decision', 'rationale'],
+      required: ['project_name', 'agent_name', 'decision', 'rationale'],
     },
   },
   {
@@ -813,12 +814,13 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         pattern_name: { type: 'string', description: 'Name of the pattern' },
         description: { type: 'string', description: 'Description of the pattern' },
         example: { type: 'string', description: 'Example code (optional)' },
         tags: { type: 'array', items: { type: 'string' }, description: 'Additional tags (optional)' },
       },
-      required: ['project_name', 'pattern_name', 'description'],
+      required: ['project_name', 'agent_name', 'pattern_name', 'description'],
     },
   },
   {
@@ -845,9 +847,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         state: { type: 'object', description: 'Project state object' },
       },
-      required: ['project_name', 'state'],
+      required: ['project_name', 'agent_name', 'state'],
     },
   },
 
@@ -930,10 +933,11 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         memory_type: { type: 'string', description: 'Memory type: state, actions, patterns, decisions, emotions, or all', enum: ['state', 'actions', 'patterns', 'decisions', 'emotions', 'all'] },
         limit: { type: 'number', description: 'Number of results (default: 10)' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
 
@@ -944,12 +948,14 @@ const tools: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {
+        project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         source_memory_id: { type: 'string', description: 'Source memory ID' },
         target_memory_id: { type: 'string', description: 'Target memory ID' },
         weight: { type: 'number', description: 'Link weight (0.0-1.0, default: 0.8)' },
         relationship: { type: 'string', description: 'Relationship type: led_to, resulted_in, used, informed_by' },
       },
-      required: ['source_memory_id', 'target_memory_id'],
+      required: ['project_name', 'agent_name', 'source_memory_id', 'target_memory_id'],
     },
   },
   {
@@ -958,10 +964,12 @@ const tools: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {
+        project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         memory_id: { type: 'string', description: 'Memory ID' },
         depth: { type: 'number', description: 'Traversal depth (default: 2)' },
       },
-      required: ['memory_id'],
+      required: ['project_name', 'agent_name', 'memory_id'],
     },
   },
   {
@@ -970,11 +978,13 @@ const tools: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {
+        project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         memory_id: { type: 'string', description: 'Memory ID' },
         reason: { type: 'string', description: 'Reason: success, frequent_use, critical_decision, reference', enum: ['success', 'frequent_use', 'critical_decision', 'reference'] },
         boost: { type: 'number', description: 'Custom boost amount (optional)' },
       },
-      required: ['memory_id', 'reason'],
+      required: ['project_name', 'agent_name', 'memory_id', 'reason'],
     },
   },
   {
@@ -983,9 +993,11 @@ const tools: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {
+        project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         memory_id: { type: 'string', description: 'Memory ID' },
       },
-      required: ['memory_id'],
+      required: ['project_name', 'agent_name', 'memory_id'],
     },
   },
   {
@@ -995,8 +1007,9 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
 
@@ -1008,10 +1021,11 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         lookback_days: { type: 'number', description: 'Days to look back (default: 7)' },
         min_frequency: { type: 'number', description: 'Minimum frequency threshold (default: 3)' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1021,9 +1035,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         lookback_days: { type: 'number', description: 'Days to look back (default: 30)' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1046,8 +1061,9 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1057,8 +1073,9 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1068,8 +1085,9 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1079,8 +1097,9 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
 
@@ -1092,9 +1111,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         lookback_days: { type: 'number', description: 'Days to look back (default: 30)' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1104,9 +1124,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         limit: { type: 'number', description: 'Maximum results (default: 20)' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1116,8 +1137,9 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1138,9 +1160,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         options: { type: 'object', description: 'Consolidation options (optional)' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
 
@@ -1152,8 +1175,9 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1163,9 +1187,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         lookback_days: { type: 'number', description: 'Days to look back (default: 30)' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1175,9 +1200,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         context: { type: 'string', description: 'Current context for recommendations' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
 
@@ -1189,9 +1215,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         context: { type: 'string', description: 'Context for quality check' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1201,9 +1228,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         days: { type: 'number', description: 'Number of days (default: 30)' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1213,8 +1241,9 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
 
@@ -1226,9 +1255,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         session_info: { type: 'string', description: 'Information about current session (optional)' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
   {
@@ -1238,9 +1268,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         days: { type: 'number', description: 'Number of days to analyze (default: 7)' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
 
@@ -1252,9 +1283,10 @@ const tools: Tool[] = [
       type: 'object',
       properties: {
         project_name: { type: 'string', description: 'Name of the project' },
+        agent_name: { type: 'string', description: 'Name of the agent performing the action' },
         context: { type: 'string', description: 'Current context (optional)' },
       },
-      required: ['project_name'],
+      required: ['project_name', 'agent_name'],
     },
   },
 
