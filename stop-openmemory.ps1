@@ -45,6 +45,7 @@ Write-Host ""
 Stop-ProcessOnPort -Port 8080 -ServiceName "OpenMemory Backend"
 Stop-ProcessOnPort -Port 8081 -ServiceName "Context Manager"
 Stop-ProcessOnPort -Port 8083 -ServiceName "Logging API"
+Stop-ProcessOnPort -Port 8084 -ServiceName "OAuth MCP Server"
 
 Write-Host ""
 Write-Success "[OK] All OpenMemory services stopped"

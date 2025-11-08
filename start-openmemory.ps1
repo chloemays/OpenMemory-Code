@@ -214,6 +214,38 @@ function Test-Prerequisites {
         }
     }
 
+    # Check OAuth MCP Server
+    $mcpServerPath = Join-Path (Get-Location) ".ai-agents/context-injection/mcp-server"
+    if (Test-Path $mcpServerPath) {
+        $mcpServerDist = Join-Path $mcpServerPath "dist"
+        if (-not (Test-Path $mcpServerDist)) {
+            Write-Warning "OAuth MCP server not built, building now..."
+            Push-Location $mcpServerPath
+            try {
+                if (-not (Test-Path "node_modules")) {
+                    Write-Info "Installing OAuth MCP server dependencies..."
+                    npm install | Out-Null
+                }
+                npm run build | Out-Null
+                Write-Success "OAuth MCP server built successfully"
+            }
+            catch {
+                Write-Warning "Failed to build OAuth MCP server"
+                Write-Info "You can build it manually later"
+            }
+            finally {
+                Pop-Location
+            }
+        }
+        else {
+            Write-Success "[OK] OAuth MCP server is built"
+        }
+    }
+    else {
+        Write-Warning "[!] OAuth MCP server not found at: $mcpServerPath"
+        Write-Info "Claude custom connector functionality will not be available"
+    }
+
     Write-Success "[OK] All prerequisites met"
     Write-Host ""
 }
@@ -232,6 +264,7 @@ function Start-OpenMemory {
             Stop-ProcessOnPort -Port 8080
             Stop-ProcessOnPort -Port 8081
             Stop-ProcessOnPort -Port 8083
+            Stop-ProcessOnPort -Port 8084
         }
         else {
             Write-Info "Keeping existing services running"
@@ -352,6 +385,59 @@ function Start-LoggingAPI {
     }
 }
 
+# Start OAuth MCP Server
+function Start-OAuthMCPServer {
+    $mcpServerPath = Join-Path (Get-Location) ".ai-agents/context-injection/mcp-server"
+    $vbsScript = Join-Path $mcpServerPath "start-oauth-mcp-hidden.vbs"
+
+    if (-not (Test-Path $vbsScript)) {
+        Write-Warning "[!] OAuth MCP server VBScript launcher not found at: $vbsScript"
+        Write-Info "Claude custom connector functionality will not be available"
+        return
+    }
+
+    # Check if already running
+    if (Test-PortInUse -Port 8084) {
+        Write-Warning "[!] Port 8084 is already in use (OAuth MCP Server)"
+        $response = Read-Host "Stop existing service and restart? (y/N)"
+        if ($response -eq "y" -or $response -eq "Y") {
+            Stop-ProcessOnPort -Port 8084
+        }
+        else {
+            Write-Info "Keeping existing OAuth MCP server running"
+            return
+        }
+    }
+
+    Write-Info "Starting OAuth MCP Server for Claude Custom Connectors..."
+
+    try {
+        Start-Process -FilePath "wscript.exe" -ArgumentList $vbsScript -WindowStyle Hidden
+        Write-Success "[OK] OAuth MCP Server process started"
+
+        # Wait for OAuth MCP Server to be ready
+        Start-Sleep -Seconds 3
+        if (-not (Wait-ForService -Url "http://localhost:8084/health" -ServiceName "OAuth MCP Server" -MaxAttempts 15)) {
+            Write-Warning "[!] OAuth MCP Server may not have started properly"
+            Write-Info "Claude custom connector functionality may not be available"
+        }
+        else {
+            # Get OAuth credentials from the health endpoint
+            try {
+                $healthResponse = Invoke-RestMethod -Uri "http://localhost:8084/health" -Method Get -ErrorAction SilentlyContinue
+                Write-Success "[OK] OAuth MCP Server running with $($healthResponse.tools) tools"
+            }
+            catch {
+                Write-Success "[OK] OAuth MCP Server is running"
+            }
+        }
+    }
+    catch {
+        Write-Warning "[!] Failed to start OAuth MCP Server: $_"
+        Write-Info "Claude custom connector functionality will not be available"
+    }
+}
+
 # Show status and instructions
 function Show-Status {
     Write-Host ""
@@ -377,6 +463,15 @@ function Show-Status {
 
     Write-Host "  • MCP Server:          " -NoNewline
     Write-Success "Ready for Claude Code (48 tools available)"
+
+    if (Test-PortInUse -Port 8084) {
+        Write-Host "  • OAuth MCP Server:    " -NoNewline
+        Write-Success "http://localhost:8084 (for Claude Custom Connectors)"
+    }
+    else {
+        Write-Host "  • OAuth MCP Server:    " -NoNewline
+        Write-Warning "Not running (custom connector unavailable)"
+    }
     Write-Host ""
 
     Write-Info "MCP Server Configuration:"
@@ -402,7 +497,7 @@ function Show-Status {
     Write-Host "  Run: " -NoNewline
     Write-Host ".\stop-openmemory.ps1" -ForegroundColor Yellow
     Write-Host "  Or:  " -NoNewline
-    Write-Host "Kill processes on ports 8080, 8081, and 8083" -ForegroundColor Yellow
+    Write-Host "Kill processes on ports 8080, 8081, 8083, and 8084" -ForegroundColor Yellow
     Write-Host ""
 
     Write-Host ("=" * 70) -ForegroundColor Green
@@ -415,10 +510,14 @@ try {
     Test-Prerequisites
     Start-OpenMemory -DevMode:$Dev
     Start-LoggingAPI
+    Start-OAuthMCPServer
     Show-Status
 
     Write-Success "OpenMemory is ready to use with Claude Code!"
     Write-Info "Restart Claude Code CLI to use the new logging/tracing tools"
+    if (Test-PortInUse -Port 8084) {
+        Write-Info "OAuth MCP Server is ready for Claude Custom Connectors via ngrok"
+    }
 }
 catch {
     Write-Error "Error: $_"
