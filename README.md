@@ -45,6 +45,7 @@ start-openmemory.bat
 
 **That's it!** This single command will:
 - ✅ Automatically configure global PowerShell commands
+- ✅ **Automatically detect and configure Claude Code MCP server** (safely, with backups)
 - ✅ Start all OpenMemory services
 - ✅ Make `openmemory-init` available from ANY directory
 
@@ -53,11 +54,23 @@ start-openmemory.bat
 - Context Manager: http://localhost:8081
 - Logging API: http://localhost:8083
 - OAuth MCP Server: http://localhost:8084
-- MCP Server: Ready for Claude Desktop
+- MCP Server: Ready for Claude Code (48 tools)
+
+**IMPORTANT:** After setup, you must **fully restart Claude Code** (close all windows & restart the app) for the MCP server to connect. See [MCP-AUTO-SETUP-SUMMARY.md](MCP-AUTO-SETUP-SUMMARY.md) for details.
+
+### Claude Code MCP Server Setup
+
+After running `start-openmemory.bat`:
+
+1. **Restart Claude Code completely** (close all windows, kill processes if needed)
+2. You should see 48 MCP tools available in Claude Code
+3. If you see "Tools: 48" but "Resources: []" - **this is normal!** ✅
+   - Resources appear after you initialize projects
+   - See [CLAUDE-MCP-TROUBLESHOOTING.md](CLAUDE-MCP-TROUBLESHOOTING.md) for details
 
 ### Initialize Your First Project
 
-After running `start-openmemory.bat`, close and reopen PowerShell, then:
+After setup, close and reopen PowerShell, then:
 
 ```powershell
 # Navigate to ANY project directory
@@ -68,6 +81,8 @@ openmemory-init
 
 # Start coding - AI agents automatically use long-term memory!
 ```
+
+**Now** resources will appear in Claude Code's MCP server!
 
 ### Quick Start (Linux/macOS)
 

@@ -558,11 +558,52 @@ try {
     Start-OAuthMCPServer
     Show-Status
 
+    Write-Host ""
+    Write-Host ("=" * 70) -ForegroundColor Yellow
     Write-Success "OpenMemory is ready to use with Claude Code!"
-    Write-Info "Restart Claude Code CLI to use the new logging/tracing tools"
+    Write-Host ("=" * 70) -ForegroundColor Yellow
+    Write-Host ""
+
+    # Check if Claude Code is running
+    $claudeRunning = Get-Process | Where-Object { $_.ProcessName -match "claude|Claude" } -ErrorAction SilentlyContinue
+    if ($claudeRunning) {
+        Write-Host "  IMPORTANT: " -NoNewline -ForegroundColor Red
+        Write-Host "Claude Code must be FULLY RESTARTED to connect to MCP server!" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "  Steps to restart:" -ForegroundColor Cyan
+        Write-Host "    1. Close ALL Claude Code windows" -ForegroundColor White
+        Write-Host "    2. Kill Claude processes: " -NoNewline -ForegroundColor White
+        Write-Host "Get-Process *claude* | Stop-Process" -ForegroundColor DarkGray
+        Write-Host "    3. Start Claude Code again" -ForegroundColor White
+        Write-Host ""
+        Write-Host "  After restarting:" -ForegroundColor Cyan
+        Write-Host "    - You should see 48 MCP tools available" -ForegroundColor White
+        Write-Host "    - Resources will appear when you initialize projects" -ForegroundColor White
+        Write-Host "    - If tools appear but NO resources = services connected [OK]" -ForegroundColor Green
+        Write-Host ""
+    }
+    else {
+        Write-Host "  When you start Claude Code:" -ForegroundColor Cyan
+        Write-Host "    - It will automatically connect to OpenMemory MCP server" -ForegroundColor White
+        Write-Host "    - 48 tools will be available for memory & context management" -ForegroundColor White
+        Write-Host "    - Resources appear after you initialize projects (openmemory-init)" -ForegroundColor White
+        Write-Host ""
+    }
+
+    Write-Info "Troubleshooting:"
+    Write-Host "  • Tools available but no resources? " -NoNewline -ForegroundColor White
+    Write-Success "Services connected [OK]" -NoNewline
+    Write-Host " - Initialize a project first!" -ForegroundColor White
+    Write-Host "  • No tools at all? " -NoNewline -ForegroundColor White
+    Write-Host "Restart Claude Code completely" -ForegroundColor Yellow
+    Write-Host "  • Connection errors? " -NoNewline -ForegroundColor White
+    Write-Host "Check services are running (ports 8080, 8081)" -ForegroundColor Yellow
+
     if (Test-PortInUse -Port 8084) {
+        Write-Host ""
         Write-Info "OAuth MCP Server is ready for Claude Custom Connectors via ngrok"
     }
+    Write-Host ""
 }
 catch {
     Write-Error "Error: $_"
