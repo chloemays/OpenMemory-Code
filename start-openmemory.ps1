@@ -108,6 +108,27 @@ function Wait-ForService {
     return $false
 }
 
+# Detect backend path
+function Get-BackendPath {
+    # First, check if we're running from the project directory
+    $scriptDir = Split-Path -Parent $PSCommandPath
+    $localBackend = Join-Path $scriptDir "backend"
+
+    if (Test-Path $localBackend) {
+        Write-Verbose "Using local backend at: $localBackend"
+        return $localBackend
+    }
+
+    # Fallback to global installation
+    $globalBackend = "$env:USERPROFILE\.openmemory-global\backend\backend"
+    if (Test-Path $globalBackend) {
+        Write-Verbose "Using global backend at: $globalBackend"
+        return $globalBackend
+    }
+
+    return $null
+}
+
 # Check prerequisites
 function Test-Prerequisites {
     Write-Info "Checking prerequisites..."
@@ -122,20 +143,24 @@ function Test-Prerequisites {
         exit 1
     }
 
-    # Check global backend
-    $backendPath = "$env:USERPROFILE\.openmemory-global\backend\backend"
-    if (-not (Test-Path $backendPath)) {
-        Write-Error "[X] OpenMemory global backend not found at: $backendPath"
+    # Detect and check backend
+    $script:backendPath = Get-BackendPath
+    if (-not $script:backendPath) {
+        $scriptDir = Split-Path -Parent $PSCommandPath
+        Write-Error "[X] OpenMemory backend not found!"
+        Write-Info "Searched locations:"
+        Write-Info "  - Local: $(Join-Path $scriptDir 'backend')"
+        Write-Info "  - Global: $env:USERPROFILE\.openmemory-global\backend\backend"
         Write-Info "Please ensure OpenMemory is properly installed."
         exit 1
     }
-    Write-Success "[OK] OpenMemory backend found"
+    Write-Success "[OK] OpenMemory backend found at: $script:backendPath"
 
     # Check if backend is built
-    $distPath = Join-Path $backendPath "dist"
+    $distPath = Join-Path $script:backendPath "dist"
     if (-not (Test-Path $distPath)) {
         Write-Warning "[!] Backend not built, building now..."
-        Push-Location $backendPath
+        Push-Location $script:backendPath
         try {
             npm run build | Out-Null
             Write-Success "[OK] Backend built successfully"
@@ -152,8 +177,15 @@ function Test-Prerequisites {
         Write-Success "[OK] Backend is built"
     }
 
-    # Check Context Manager
-    $contextManagerPath = "$env:USERPROFILE\.openmemory-global\backend\.ai-agents\context-injection\context-manager"
+    # Check Context Manager (look for it relative to backend path or in project)
+    $scriptDir = Split-Path -Parent $PSCommandPath
+    $contextManagerPath = Join-Path $scriptDir ".ai-agents\context-injection\context-manager"
+
+    # Fallback to global location if not found locally
+    if (-not (Test-Path $contextManagerPath)) {
+        $contextManagerPath = "$env:USERPROFILE\.openmemory-global\backend\.ai-agents\context-injection\context-manager"
+    }
+
     if (-not (Test-Path $contextManagerPath)) {
         Write-Error "[X] Context Manager not found at: $contextManagerPath"
         exit 1
@@ -254,7 +286,11 @@ function Test-Prerequisites {
 function Start-OpenMemory {
     param([switch]$DevMode)
 
-    $backendPath = "$env:USERPROFILE\.openmemory-global\backend\backend"
+    # Use the detected backend path from Test-Prerequisites
+    if (-not $script:backendPath) {
+        Write-Error "[X] Backend path not set. This should not happen."
+        exit 1
+    }
 
     # Check if services are already running
     if (Test-PortInUse -Port 8080) {
@@ -274,11 +310,20 @@ function Start-OpenMemory {
 
     Write-Info "Starting OpenMemory Backend..."
 
-    Push-Location $backendPath
+    Push-Location $script:backendPath
 
     try {
-        # Create log directory
-        $logDir = "$env:USERPROFILE\.openmemory-global\logs"
+        # Create log directory - use local project logs if running locally, global otherwise
+        $scriptDir = Split-Path -Parent $PSCommandPath
+        if ($script:backendPath -like "$scriptDir*") {
+            # Local installation - use local logs
+            $logDir = Join-Path $scriptDir "logs"
+        }
+        else {
+            # Global installation - use global logs
+            $logDir = "$env:USERPROFILE\.openmemory-global\logs"
+        }
+
         if (-not (Test-Path $logDir)) {
             New-Item -ItemType Directory -Path $logDir -Force | Out-Null
         }

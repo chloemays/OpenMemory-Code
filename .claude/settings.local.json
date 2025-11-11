@@ -7,7 +7,15 @@
       "Bash(curl:*)",
       "Bash(gh repo create:*)",
       "Bash(where:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(test:*)",
+      "Bash(where.exe pwsh)",
+      "Bash(powershell -Command \"where.exe powershell\")",
+      "Bash(powershell:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(start-openmemory.bat)",
+      "Bash(cmd /c \"C:\\Users\\Chloe\\Desktop\\Projects\\FatStinkyPanda\\OpenMemory-Code\\start-openmemory.bat\")"
     ],
     "deny": [],
     "ask": []
