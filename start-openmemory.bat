@@ -1,10 +1,48 @@
 @echo off
 REM OpenMemory-Code Unified Startup Script
-REM This wrapper calls the PowerShell startup script
+REM This wrapper sets up global commands and calls the PowerShell startup script
 
-echo Starting OpenMemory-Code...
+echo.
+echo ========================================
+echo OpenMemory-Code Complete Setup
+echo ========================================
 echo.
 
+REM First, check if global commands need to be set up
+echo [1/2] Checking global command configuration...
+powershell -ExecutionPolicy Bypass -Command "& { $profile = $PROFILE.CurrentUserAllHosts; if (-not $profile) { $profile = \"$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1\" }; if (-not (Test-Path $profile)) { exit 1 }; $content = Get-Content $profile -Raw -ErrorAction SilentlyContinue; if ($content -match '# OpenMemory-Code Global Commands') { exit 0 } else { exit 1 } }"
+
+if %ERRORLEVEL% NEQ 0 (
+    echo Global commands not found in PowerShell profile. Setting up...
+    echo.
+    powershell -ExecutionPolicy Bypass -File "%~dp0setup-global-commands.ps1" -Force
+    if %ERRORLEVEL% NEQ 0 (
+        echo.
+        echo WARNING: Failed to setup global commands
+        echo You can run setup-global-commands.ps1 manually later
+        echo.
+        pause
+    ) else (
+        echo.
+        echo ========================================
+        echo SUCCESS: Global Commands Configured!
+        echo ========================================
+        echo.
+        echo You can now run these commands from ANY directory:
+        echo   - openmemory-init [project-path]
+        echo   - start-openmemory [-Dev]
+        echo   - stop-openmemory
+        echo.
+        echo NOTE: Close and reopen PowerShell to use these commands
+        echo.
+    )
+) else (
+    echo Global commands already configured [OK]
+    echo.
+)
+
+echo [2/2] Starting OpenMemory services...
+echo.
 powershell -ExecutionPolicy Bypass -File "%~dp0start-openmemory.ps1"
 
 if %ERRORLEVEL% NEQ 0 (

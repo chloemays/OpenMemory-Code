@@ -24,9 +24,11 @@
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Windows)
 
-```bash
+### One-Command Setup 🎉
+
+```batch
 # 1. Clone repository
 git clone https://github.com/fatstinkypanda/OpenMemory-Code.git
 cd OpenMemory-Code
@@ -37,25 +39,47 @@ npm run install:all
 # 3. Build everything
 npm run build
 
-# 4. Start (all services auto-start)
-npm start
+# 4. Run the complete setup (sets up global commands + starts services)
+start-openmemory.bat
 ```
 
-**That's it!** OpenMemory-Code is now running:
+**That's it!** This single command will:
+- ✅ Automatically configure global PowerShell commands
+- ✅ Start all OpenMemory services
+- ✅ Make `openmemory-init` available from ANY directory
+
+**Services Running:**
 - Backend: http://localhost:8080
 - Context Manager: http://localhost:8081
+- Logging API: http://localhost:8083
+- OAuth MCP Server: http://localhost:8084
 - MCP Server: Ready for Claude Desktop
 
 ### Initialize Your First Project
 
-```bash
-# Navigate to your project
-cd ~/Projects/MyApp
+After running `start-openmemory.bat`, close and reopen PowerShell, then:
 
-# Initialize OpenMemory-Code
-node /path/to/OpenMemory-Code/openmemory-init.js
+```powershell
+# Navigate to ANY project directory
+cd C:\Projects\MyApp
+
+# Initialize OpenMemory (now available globally!)
+openmemory-init
 
 # Start coding - AI agents automatically use long-term memory!
+```
+
+### Quick Start (Linux/macOS)
+
+```bash
+# 1-3: Same as above (clone, install, build)
+
+# 4. Start services
+npm start
+
+# 5. Initialize a project
+cd ~/Projects/MyApp
+node /path/to/OpenMemory-Code/openmemory-init.js
 ```
 
 For detailed setup instructions, see [QUICKSTART.md](QUICKSTART.md).
